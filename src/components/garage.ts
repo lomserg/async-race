@@ -1,5 +1,5 @@
 import type { Car } from "../types/car";
-
+import { renderCarForm } from "./car-form";
 export function renderGarage(cars: Car[]): string {
   const carsMarkup = cars
     .map(
@@ -19,6 +19,9 @@ export function renderGarage(cars: Car[]): string {
   return `
         <section class="garage">
             <h1>Garage</h1>
+
+            ${renderCarForm()}
+
             <p>Cars: ${cars.length}</p>
 
             <div class="cars">
