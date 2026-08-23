@@ -1,0 +1,47 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.garage {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px;
+}
+
+.cars {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.car-track {
+  position: relative;
+  height: 70px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.car {
+  position: absolute;
+  left: 0;
+  top: 10px;
+  font-size: 40px;
+  transition: none;
+}
+
+.car h2 {
+  margin: 0;
+  min-width: 200px;
+}
+
+.car-color {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
