@@ -21,8 +21,16 @@ export function renderCarForm(): string {
                 >
             </label>
 
-            <button type="submit">
+            <button type="submit" id="submit-car">
                 Create
+            </button>
+
+            <button
+                type="button"
+                id="cancel-edit"
+                hidden
+            >
+                Cancel
             </button>
         </form>
     `;
