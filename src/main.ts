@@ -1,8 +1,18 @@
 import "./styles.css";
 
-import { createCar, deleteCar, getCars, updateCar } from "./api/cars-api";
+import {
+  createCar,
+  deleteCar,
+  driveCar,
+  getCars,
+  startEngine,
+  stopEngine,
+  updateCar,
+} from "./api/cars-api";
+import { animateCar, stopAnimation } from "./utils/car-animation";
 import { renderGarage } from "./components/garage";
 import { garageState } from "./state/garage-state";
+import { generateCarData } from "./utils/car-generator";
 
 function getAppElement(): HTMLDivElement {
   const app = document.querySelector<HTMLDivElement>("#app");
@@ -46,8 +56,41 @@ async function init(): Promise<void> {
 
     garageState.cars = cars;
 
-    app.innerHTML = renderGarage(cars);
+    app.innerHTML = renderGarage(cars, garageState.currentPage);
+    const generateButton =
+      document.querySelector<HTMLButtonElement>("#generate-cars");
 
+    if (!generateButton) {
+      throw new Error("Generate button not found");
+    }
+
+    generateButton.addEventListener("click", async () => {
+      for (let index = 0; index < 100; index += 1) {
+        const car = generateCarData();
+
+        await createCar(car.name, car.color);
+      }
+
+      await render();
+    });
+    const previousButton =
+      document.querySelector<HTMLButtonElement>("#prev-page");
+
+    const nextButton = document.querySelector<HTMLButtonElement>("#next-page");
+
+    if (!previousButton || !nextButton) {
+      throw new Error("Pagination buttons not found");
+    }
+
+    previousButton.addEventListener("click", async () => {
+      garageState.currentPage -= 1;
+      await render();
+    });
+
+    nextButton.addEventListener("click", async () => {
+      garageState.currentPage += 1;
+      await render();
+    });
     const deleteButtons =
       document.querySelectorAll<HTMLButtonElement>(".delete-car");
 
@@ -94,7 +137,86 @@ async function init(): Promise<void> {
         cancelButton.hidden = false;
       });
     }
+    const startButtons =
+      document.querySelectorAll<HTMLButtonElement>(".start-engine");
 
+    for (const button of startButtons) {
+      button.addEventListener("click", async () => {
+        const idValue = button.dataset.id;
+
+        if (!idValue) {
+          throw new TypeError("Car ID not found");
+        }
+
+        const id = Number(idValue);
+
+        const carElement = document.querySelector<HTMLElement>(
+          `.car[data-car-id="${id}"]`,
+        );
+
+        const track = carElement?.parentElement;
+
+        const stopButton = document.querySelector<HTMLButtonElement>(
+          `.stop-engine[data-id="${id}"]`,
+        );
+
+        if (!carElement || !track || !stopButton) {
+          throw new TypeError("Car elements not found");
+        }
+
+        button.disabled = true;
+        stopButton.disabled = false;
+
+        const result = await startEngine(id);
+
+        const availableDistance = track.clientWidth - carElement.offsetWidth;
+
+        const duration = result.distance / result.velocity;
+
+        animateCar(carElement, availableDistance, duration);
+
+        try {
+          await driveCar(id);
+        } catch {
+          // Сервер может вернуть 500 при поломке двигателя.
+        }
+      });
+    }
+
+    const stopButtons =
+      document.querySelectorAll<HTMLButtonElement>(".stop-engine");
+
+    for (const button of stopButtons) {
+      button.addEventListener("click", async () => {
+        const idValue = button.dataset.id;
+
+        if (!idValue) {
+          throw new TypeError("Car ID not found");
+        }
+
+        const id = Number(idValue);
+
+        const carElement = document.querySelector<HTMLElement>(
+          `.car[data-car-id="${id}"]`,
+        );
+
+        const startButton = document.querySelector<HTMLButtonElement>(
+          `.start-engine[data-id="${id}"]`,
+        );
+
+        if (!carElement || !startButton) {
+          throw new TypeError("Car elements not found");
+        }
+
+        stopAnimation(carElement);
+
+        await stopEngine(id);
+
+        carElement.style.transform = "translateX(0)";
+        button.disabled = true;
+        startButton.disabled = false;
+      });
+    }
     const form = document.querySelector<HTMLFormElement>("#car-form");
 
     if (!form) {

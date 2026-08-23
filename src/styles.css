@@ -19,13 +19,20 @@ body {
   gap: 16px;
 }
 
-.car {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 16px;
+.car-track {
+  position: relative;
+  height: 70px;
   border: 1px solid #ddd;
   border-radius: 8px;
+  overflow: hidden;
+}
+
+.car {
+  position: absolute;
+  left: 0;
+  top: 10px;
+  font-size: 40px;
+  transition: none;
 }
 
 .car h2 {
