@@ -1,6 +1,6 @@
 import "./styles.css";
 
-import { createCar, getCars } from "./api/cars-api";
+import { createCar, deleteCar, getCars } from "./api/cars-api";
 import { renderGarage } from "./components/garage";
 
 function getAppElement(): HTMLDivElement {
@@ -20,6 +20,24 @@ async function init(): Promise<void> {
     const cars = await getCars();
 
     app.innerHTML = renderGarage(cars);
+
+    const deleteButtons =
+      document.querySelectorAll<HTMLButtonElement>(".delete-car");
+
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", async () => {
+        const idValue = button.dataset.id;
+
+        if (!idValue) {
+          throw new Error("Car ID not found");
+        }
+
+        const id = Number(idValue);
+
+        await deleteCar(id);
+        await render();
+      });
+    });
 
     const form = document.querySelector<HTMLFormElement>("#car-form");
 
