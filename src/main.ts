@@ -112,7 +112,7 @@ async function init(): Promise<void> {
 
       const racePromises = pageCars.map(async (car) => {
         const carElement = document.querySelector<HTMLElement>(
-          `.car[data-car-id="${car.id}"]`,
+          `.car[data-car-id="${CSS.escape(String(car.id))}"]`,
         );
 
         const track = carElement?.parentElement;
@@ -120,7 +120,6 @@ async function init(): Promise<void> {
         if (!carElement || !track) {
           throw new Error("Car elements not found");
         }
-
         const result = await startEngine(car.id);
 
         const availableDistance = track.clientWidth - carElement.offsetWidth;
@@ -258,13 +257,13 @@ async function init(): Promise<void> {
         const id = Number(idValue);
 
         const carElement = document.querySelector<HTMLElement>(
-          `.car[data-car-id="${id}"]`,
+          `.car[data-car-id="${CSS.escape(String(id))}"]`,
         );
 
         const track = carElement?.parentElement;
 
         const stopButton = document.querySelector<HTMLButtonElement>(
-          `.stop-engine[data-id="${id}"]`,
+          `.stop-engine[data-id="${CSS.escape(String(id))}"]`,
         );
 
         if (!carElement || !track || !stopButton) {
@@ -304,11 +303,11 @@ async function init(): Promise<void> {
         const id = Number(idValue);
 
         const carElement = document.querySelector<HTMLElement>(
-          `.car[data-car-id="${id}"]`,
+          `.car[data-car-id="${CSS.escape(String(id))}"]`,
         );
 
         const startButton = document.querySelector<HTMLButtonElement>(
-          `.start-engine[data-id="${id}"]`,
+          `.start-engine[data-id="${CSS.escape(String(id))}"]`,
         );
 
         if (!carElement || !startButton) {
