@@ -63,7 +63,27 @@ async function init(): Promise<void> {
     if (!generateButton) {
       throw new Error("Generate button not found");
     }
+    const startRaceButton =
+      document.querySelector<HTMLButtonElement>("#start-race");
 
+    const resetRaceButton =
+      document.querySelector<HTMLButtonElement>("#reset-race");
+
+    const winnerButton =
+      document.querySelector<HTMLButtonElement>("#show-winner");
+
+    const winnerElement =
+      document.querySelector<HTMLParagraphElement>("#race-winner");
+
+    if (
+      !generateButton ||
+      !startRaceButton ||
+      !resetRaceButton ||
+      !winnerButton ||
+      !winnerElement
+    ) {
+      throw new Error("Race elements not found");
+    }
     generateButton.addEventListener("click", async () => {
       for (let index = 0; index < 100; index += 1) {
         const car = generateCarData();
@@ -73,6 +93,93 @@ async function init(): Promise<void> {
 
       await render();
     });
+
+    startRaceButton.addEventListener("click", async () => {
+      if (garageState.raceStarted) {
+        return;
+      }
+
+      garageState.raceStarted = true;
+      garageState.winner = undefined;
+      winnerElement.textContent = "";
+
+      startRaceButton.disabled = true;
+
+      const pageCars = cars.slice(
+        (garageState.currentPage - 1) * 7,
+        garageState.currentPage * 7,
+      );
+
+      const racePromises = pageCars.map(async (car) => {
+        const carElement = document.querySelector<HTMLElement>(
+          `.car[data-car-id="${car.id}"]`,
+        );
+
+        const track = carElement?.parentElement;
+
+        if (!carElement || !track) {
+          throw new Error("Car elements not found");
+        }
+
+        const result = await startEngine(car.id);
+
+        const availableDistance = track.clientWidth - carElement.offsetWidth;
+
+        const duration = result.distance / result.velocity;
+
+        return new Promise<string>((resolve) => {
+          animateCar(carElement, availableDistance, duration, () => {
+            resolve(car.name);
+          });
+        });
+      });
+
+      const winner = await Promise.race(racePromises);
+
+      garageState.winner = winner;
+      garageState.raceStarted = false;
+
+      winnerElement.textContent = `🏆 Winner: ${winner}`;
+
+      startRaceButton.disabled = false;
+    });
+
+    resetRaceButton.addEventListener("click", async () => {
+      garageState.raceStarted = false;
+      garageState.winner = undefined;
+
+      const carElements = document.querySelectorAll<HTMLElement>(".car");
+
+      for (const carElement of carElements) {
+        stopAnimation(carElement);
+        carElement.style.transform = "translateX(0)";
+
+        const idValue = carElement.dataset.carId;
+
+        if (!idValue) {
+          continue;
+        }
+
+        try {
+          await stopEngine(Number(idValue));
+        } catch {
+          // Двигатель мог уже остановиться.
+        }
+      }
+
+      winnerElement.textContent = "";
+      startRaceButton.disabled = false;
+    });
+
+    winnerButton.addEventListener("click", () => {
+      if (!garageState.winner) {
+        winnerElement.textContent = "🏆 Race hasn't started yet";
+        return;
+      }
+
+      winnerElement.textContent = `🏆 Winner: ${garageState.winner}`;
+    });
+
     const previousButton =
       document.querySelector<HTMLButtonElement>("#prev-page");
 

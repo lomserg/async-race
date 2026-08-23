@@ -80,7 +80,21 @@ export function renderGarage(cars: Car[], currentPage: number): string {
       >
         Generate 100 cars
       </button>
+<div class="race-controls">
+  <button type="button" id="start-race">
+    🏁 Start Race
+  </button>
 
+  <button type="button" id="reset-race">
+    🔄 Reset Race
+  </button>
+
+  <button type="button" id="show-winner">
+    🏆 Winner
+  </button>
+</div>
+
+<p id="race-winner"></p>
       <p>Cars: ${cars.length}</p>
 
       <div class="cars">

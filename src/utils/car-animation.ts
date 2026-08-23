@@ -1,9 +1,10 @@
-const animationIds = new WeakMap<HTMLElement, number>();
+const animationIds = new Map<HTMLElement, number>();
 
 export function animateCar(
   element: HTMLElement,
   distance: number,
   duration: number,
+  onFinish?: () => void,
 ): void {
   const startTime = performance.now();
 
@@ -16,13 +17,16 @@ export function animateCar(
 
     if (progress < 1) {
       const animationId = requestAnimationFrame(animate);
+
       animationIds.set(element, animationId);
     } else {
       animationIds.delete(element);
+      onFinish?.();
     }
   };
 
   const animationId = requestAnimationFrame(animate);
+
   animationIds.set(element, animationId);
 }
 
